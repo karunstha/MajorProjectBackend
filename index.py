@@ -28,9 +28,10 @@ def upload_file():
 		return resp
 	if file and allowed_file(file.filename):
 		filename = secure_filename(file.filename)
+		extension = filename.rsplit('.', 1)[1].lower()
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-		# resp = jsonify({'message' : 'File successfully uploaded'})
-
+		os.rename(os.path.join(app.config['UPLOAD_FOLDER'], filename), os.path.join(app.config['UPLOAD_FOLDER'], 'latest.'+extension))
+		resp = jsonify({'message' : 'File successfully uploaded'})
 		resp.status_code = 201
 		return resp
 	else:
