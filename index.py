@@ -5,6 +5,8 @@ from app import app
 from flask import Flask, request, redirect, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from utils import save_image
+from datetime import datetime
+from enhance import *
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
@@ -30,8 +32,20 @@ def upload_file():
 		filename = secure_filename(file.filename)
 		extension = filename.rsplit('.', 1)[1].lower()
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-		os.rename(os.path.join(app.config['UPLOAD_FOLDER'], filename), os.path.join(app.config['UPLOAD_FOLDER'], 'latest.'+extension))
-		resp = jsonify({'message' : 'File successfully uploaded'})
+		newFileName = datetime.now().strftime("%Y%m%d%H%M%S%f")
+		newFileNameWithExtension = newFileName + "." + extension
+		newFilePath = os.path.join(app.config['UPLOAD_FOLDER'], newFileNameWithExtension)
+		os.rename(os.path.join(app.config['UPLOAD_FOLDER'], filename), newFilePath)
+
+		withDownsample = request.form.get('downsample')
+		print(withDownsample)
+		if withDownsample is not None and withDownsample == "true":
+			print("Enhancing with Downsample")
+			enhance_with_downsample(newFilePath)
+		else:
+			enhance(newFilePath)
+
+		resp = jsonify({'enhanced' : 'http://15.206.253.19:8080/super_res/'+newFileName+".jpg"})
 		resp.status_code = 201
 		return resp
 	else:
