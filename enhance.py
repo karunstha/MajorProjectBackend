@@ -27,7 +27,6 @@ def enhance(image_path):
     save_image(tf.squeeze(fake_image), filename="super_res/"+Path(image_path).stem)
 
 def enhance_with_downsample(image_path):
-    today = date.today()
     hr_image = preprocess_image(image_path)
     
     hr_image = downscale_image(tf.squeeze(hr_image))
